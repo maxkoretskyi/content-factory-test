@@ -62,6 +62,12 @@ If you are the opening section, start where the reader's current belief is wrong
 scene-setting. If you are the last, close where the argument is paid off, not with a summary
 of the article.
 
+## The author's own material outranks everything
+
+If the brief contains something concrete the author supplied — a code sample, an exact quote, a
+URL, a value — use it as given. Do not paraphrase it, improve it, or replace it with your own
+version of the same idea. They put it there because it is what they meant.
+
 ## Use the evidence you were given
 
 If evidence.md is present it holds reproductions, verified specifics with their sources, and

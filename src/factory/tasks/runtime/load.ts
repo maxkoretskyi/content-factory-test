@@ -1,4 +1,4 @@
-import { readFileSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { createProviderRegistry, generateText, stepCountIs, type ToolSet } from "ai";
 import { createGoogleGenerativeAI, google } from "@ai-sdk/google";
@@ -74,6 +74,11 @@ function loadFrom(folder: string, label: string, schema: typeof PromptConfigSche
     const list = config.sources.map((s) => "- " + (s.search ? "`" + s.search + "` — " : "") + s.for);
     system = [system, "", "## Where to look", "", ...list].join(NL);
   }
+
+  // The confirmation policy is prose, so it lives in a file like everything else
+  // the model reads. Config only names which one.
+  const policy = join(folder, "confirm", config.confirm + ".md");
+  if (existsSync(policy)) system = [system, "", readFileSync(policy, "utf8")].join(NL);
 
   return { system, config };
 }

@@ -4,11 +4,11 @@ import { slugSchema } from "../../artifacts/store.js";
 import { runWorkflow } from "../../tasks/runtime/run.js";
 
 /** The tasks this tool runs, in order. */
-const TASKS = ["plan", "enrich", "compress", "verify"] as const;
+const TASKS = ["evidence", "plan", "enrich", "compress", "verify"] as const;
 
 export const makeDraft = tool({
   description:
-    "Write the article: plan, enrich, compress, verify — in one call. Use once the author has chosen an angle. Requires brief.json and research.md.",
+    "Write the article: gather evidence, plan, enrich, compress, verify — in one call. Use once the author has chosen an angle. Requires brief.json and research.md.",
   inputSchema: z.object({
     slug: slugSchema,
     instruction: z

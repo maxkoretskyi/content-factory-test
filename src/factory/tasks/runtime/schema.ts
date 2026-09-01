@@ -27,6 +27,19 @@ export const PromptConfigSchema = z.object({
    */
   toolset: z.array(z.string()).optional(),
 
+  /**
+   * How often to stop and ask the author. Only the editor uses this.
+   *
+   *   each-step   confirm after anything that produces an artifact (default)
+   *   angle-only  run straight through, but still stop to pick the angle
+   *   never       take the research stage's own recommendation and keep going
+   *
+   * The matching editor/confirm/<mode>.md is appended to the prompt, and the
+   * agent loop drops its one-producer-per-turn restriction unless this is
+   * each-step.
+   */
+  confirm: z.enum(["each-step", "angle-only", "never"]).default("each-step"),
+
   /** For humans reading the directory. Never sent to a model. */
   note: z.string().optional(),
 });

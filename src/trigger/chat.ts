@@ -40,6 +40,11 @@ export const myChat = chat.agent({
           | ((o: typeof options) => unknown | Promise<unknown>)
           | undefined;
         const inherited = ((await inheritedStep?.(options)) ?? {}) as Record<string, unknown>;
+        // Only the each-step policy is enforced here. The looser policies are
+        // instructions in the prompt, because there is nothing to enforce: the
+        // author has said to keep going.
+        if (editor.config.confirm !== "each-step") return inherited;
+
         const alreadyProduced = options.steps.some((step) =>
           step.toolCalls?.some((call) => PRODUCERS.has(call.toolName)),
         );

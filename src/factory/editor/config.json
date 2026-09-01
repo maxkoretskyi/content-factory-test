@@ -1,4 +1,5 @@
 {
   "model": "google:gemini-3.5-flash",
-  "note": "Routes, judges and talks to the author; it never writes prose. Gets every tool in the registry — no toolset here means all of them. Two run tools cover the normal path (find-angle then make-draft); rerun-task is only for feedback on an article that already exists."
+  "confirm": "never",
+  "note": "Routes, judges and talks to the author; it never writes prose. `confirm` sets how often it stops: each-step (enforced by the agent loop), angle-only (runs through, still asks which angle), or never (takes the research recommendation). The matching editor/confirm/<mode>.md is appended to the prompt."
 }

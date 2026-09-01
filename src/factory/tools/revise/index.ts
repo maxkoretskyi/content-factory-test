@@ -1,6 +1,6 @@
 import { tool } from "ai";
 import { z } from "zod";
-import { readArtifact, slugSchema } from "../../artifacts/store.js";
+import { readArtifact, resolveSlug, slugSchema } from "../../artifacts/store.js";
 import { changeStats } from "../../artifacts/diff.js";
 import { runWorkflow } from "../../tasks/runtime/run.js";
 
@@ -22,7 +22,11 @@ export const revise = tool({
         "What to change, in the author's own words wherever they gave them. Be specific about where: 'the opening paragraph', 'section 3', 'the Lambda example'.",
       ),
   }),
-  execute: async ({ slug, instruction }) => {
+  execute: async ({ slug: given, instruction }) => {
+    const resolved = resolveSlug(given);
+    if (typeof resolved === "string") return resolved;
+    const { slug } = resolved;
+
     const before = (await readArtifact(slug, "draft.md")) ?? "";
     const result = await runWorkflow(TASKS, slug, instruction);
     const after = (await readArtifact(slug, "draft.md")) ?? "";

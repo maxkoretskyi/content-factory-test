@@ -6,6 +6,7 @@
  *   npm run chat -- --id my-convo       # resume an existing conversation
  *   npm run chat -- --once "hello"      # send one message, print, exit
  */
+import { readFileSync } from "node:fs";
 import readline from "node:readline/promises";
 import { configure } from "@trigger.dev/sdk";
 import { AgentChat } from "@trigger.dev/sdk/chat";
@@ -22,6 +23,7 @@ const flag = (name: string) => {
 
 const chatId = flag("id") ?? `cli-${Date.now()}`;
 const once = flag("once");
+const fromFile = flag("file");
 const agent = new AgentChat<typeof myChat>({ agent: "my-chat", id: chatId });
 
 const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
@@ -35,14 +37,25 @@ const rl = readline.createInterface({ input: process.stdin, output: process.stdo
 async function ask(prompt: string): Promise<string> {
   const first = await rl.question(prompt);
   const rest: string[] = [];
+
+  // Keep collecting until input actually stops. A fixed window is not enough: a
+  // long paste with a code block arrives in bursts with gaps between them, and
+  // anything not collected here would be answered by the next prompt instead.
   await new Promise<void>((resolve) => {
-    const onLine = (line: string) => rest.push(line);
-    rl.on("line", onLine);
-    setTimeout(() => {
+    let timer: NodeJS.Timeout;
+    const done = () => {
       rl.off("line", onLine);
       resolve();
-    }, 80);
+    };
+    const onLine = (line: string) => {
+      rest.push(line);
+      clearTimeout(timer);
+      timer = setTimeout(done, 250);
+    };
+    rl.on("line", onLine);
+    timer = setTimeout(done, 250);
   });
+
   return [first, ...rest].join(String.fromCharCode(10)).trim();
 }
 
@@ -208,12 +221,37 @@ if (once !== undefined) {
   await agent.close();
   rl.close();
 } else {
-  console.log("(/exit to close, Ctrl-C to leave the conversation running)\n");
+  console.log("(/paste for multi-line, /exit to close, Ctrl-C to leave it running)");
+
+  // --file sends the first message from disk, so a long prompt with code blocks
+  // never touches the terminal's paste handling.
+  if (fromFile) {
+    const text = readFileSync(fromFile, "utf8").trim();
+    const lineCount = text.split(String.fromCharCode(10)).length;
+    console.log(`you > (${fromFile}: ${lineCount} lines, ${text.length} chars)`);
+    await say(text);
+  }
   try {
     while (true) {
-      const line = await ask("you > ");
+      let line = await ask("you > ");
       if (!line) continue;
       if (line === "/exit") break;
+
+      // Deterministic multi-line entry, for when paste detection is not reliable:
+      // terminals deliver a long block in bursts, and a code fence makes the gaps
+      // longer. Type /paste, paste anything, then /end on its own line.
+      if (line === "/paste") {
+        console.log("  (paste, then /end on its own line)");
+        const block: string[] = [];
+        while (true) {
+          const next = await ask("");
+          if (next === "/end") break;
+          block.push(next);
+        }
+        line = block.join(String.fromCharCode(10)).trim();
+        if (!line) continue;
+        console.log(`  ${line.split(String.fromCharCode(10)).length} lines, ${line.length} chars`);
+      }
       await say(line);
       process.stdout.write("\n");
     }

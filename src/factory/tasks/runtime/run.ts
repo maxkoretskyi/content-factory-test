@@ -7,6 +7,7 @@ import {
   writeArtifact,
   writeSection,
   existingSlugs,
+  resolveSlug,
 } from "../../artifacts/store.js";
 import { countWords, renderJson } from "../../artifacts/text.js";
 import { BriefSchema } from "../../artifacts/brief.js";
@@ -90,7 +91,12 @@ async function runEnrich(slug: string, instruction?: string, redo = false) {
 }
 
 /** One task: read its inputs, run them through the task, write its output. */
-export async function runOne(task: Task, slug: string, instruction?: string, redo = false) {
+export async function runOne(task: Task, given: string, instruction?: string, redo = false) {
+  // Resolve first: the model drifts on the slug between calls, and a task that
+  // writes to a directory nobody else used leaves the article in pieces.
+  const resolved = resolveSlug(given);
+  if (typeof resolved === "string") return resolved;
+  const slug = resolved.slug;
   // Declared by the task, not hardcoded here.
   if (loadTask(task).config.mode === "per-section") return runEnrich(slug, instruction, redo);
 

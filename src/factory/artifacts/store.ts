@@ -93,3 +93,35 @@ export function existingSlugs(): string[] {
     .map((e) => e.name)
     .sort();
 }
+
+/**
+ * Resolve a slug the model supplied against the articles that actually exist.
+ *
+ * The slug is a free string repeated across a dozen tool calls, and the model
+ * drifts: one run wrote request.md to `trigger-checkpoint-resume`, plan.md to
+ * `trigger-dev-checkpoint-resume`, and its sections to `trigger-dev-suspend-resume`.
+ * Every task ran, nothing errored, and the article was in three pieces.
+ *
+ * So only save-request creates a directory. Everything else resolves: an exact
+ * match wins; failing that, the closest existing slug if there is exactly one
+ * close enough; failing that, an error naming what exists.
+ */
+export function resolveSlug(given: string): { slug: string; corrected?: string } | string {
+  const known = existingSlugs();
+  if (known.includes(given)) return { slug: given };
+  if (!known.length) return `No articles exist yet. Run save-request first.`;
+
+  const near = known.filter((k) => similar(k, given));
+  if (near.length === 1) return { slug: near[0]!, corrected: given };
+  if (known.length === 1) return { slug: known[0]!, corrected: given };
+
+  return `No article '${given}'. Existing: ${known.join(", ")}. Use one of these exactly.`;
+}
+
+/** Same words in the same order, ignoring extras — 'trigger-dev-x' matches 'trigger-x'. */
+function similar(a: string, b: string) {
+  const wordsA = a.split("-");
+  const wordsB = b.split("-");
+  const shared = wordsA.filter((w) => wordsB.includes(w)).length;
+  return shared >= Math.max(2, Math.min(wordsA.length, wordsB.length) - 1);
+}
