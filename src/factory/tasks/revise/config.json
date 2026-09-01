@@ -1,0 +1,8 @@
+{
+  "in": ["draft.md"],
+  "out": "draft.md",
+  "mode": "single",
+  "model": "google:gemini-3.1-pro-preview",
+  "temperature": 0.4,
+  "note": "Applies author feedback. Strong model because it has to write prose that matches what is already there, low temperature because the job is to blend in rather than be interesting."
+}

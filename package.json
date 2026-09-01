@@ -7,7 +7,7 @@
   "scripts": {
     "dev:trigger": "trigger dev",
     "deploy:trigger": "trigger deploy",
-    "chat": "tsx scripts/chat.ts",
+    "chat": "tsx src/tui/chat.ts",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {

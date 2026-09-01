@@ -1,0 +1,4 @@
+{
+  "model": "google:gemini-3.5-flash",
+  "note": "Routes, judges and talks to the author; it never writes prose. Gets every tool in the registry — no toolset here means all of them. Two run tools cover the normal path (find-angle then make-draft); rerun-task is only for feedback on an article that already exists."
+}

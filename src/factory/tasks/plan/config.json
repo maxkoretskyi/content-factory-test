@@ -1,0 +1,11 @@
+{
+  "in": [
+    "brief.json",
+    "research.md"
+  ],
+  "out": "plan.md",
+  "mode": "single",
+  "model": "google:gemini-3.1-pro-preview",
+  "temperature": 0.6,
+  "note": "Structure work. Needs the strongest reasoning available; output is state, not prose."
+}

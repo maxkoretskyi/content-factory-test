@@ -1,0 +1,9 @@
+{
+  "in": ["request.md"],
+  "out": "brief.json",
+  "mode": "single",
+  "validates": "brief",
+  "model": "google:gemini-3.1-pro-preview",
+  "temperature": 0.3,
+  "note": "Infers who the article is for from one line of request. Judgement, so it gets the strong model; low temperature because a classification should be stable, not creative."
+}

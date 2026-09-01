@@ -9,5 +9,5 @@
     "skipLibCheck": true,
     "noEmit": true
   },
-  "include": ["src", "scripts", "trigger.config.ts"]
+  "include": ["src", "trigger.config.ts"]
 }

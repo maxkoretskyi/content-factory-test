@@ -1,0 +1,10 @@
+{
+  "in": [
+    "plan.md"
+  ],
+  "out": "draft.md",
+  "mode": "per-section",
+  "model": "google:gemini-3.1-pro-preview",
+  "temperature": 0.8,
+  "note": "Prose. Higher temperature for range. Ungated on purpose: once the angle is chosen, make-draft runs plan through verify without stopping \u2014 the author judges the finished draft, not the plan."
+}

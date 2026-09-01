@@ -1,0 +1,37 @@
+{
+  "in": [
+    "brief.json"
+  ],
+  "out": "research.md",
+  "mode": "single",
+  "model": "google:gemini-3.1-pro-preview",
+  "temperature": 0.7,
+  "maxTasks": 20,
+  "tools": [
+    "google_search",
+    "url_context"
+  ],
+  "sources": [
+    {
+      "search": "site:reddit.com",
+      "for": "what practitioners complain about, and what keeps getting re-asked"
+    },
+    {
+      "search": "site:news.ycombinator.com",
+      "for": "where the disagreement is sharpest, especially in comment threads"
+    },
+    {
+      "search": "site:substack.com",
+      "for": "people arguing a position at length"
+    },
+    {
+      "search": "site:medium.com",
+      "for": "the mainstream take, and therefore what to argue against"
+    },
+    {
+      "search": "",
+      "for": "plain web search: official docs, changelogs and post-mortems, for what is actually true"
+    }
+  ],
+  "note": "The only task with web access. Needs the strong model: judging whether a disagreement is real is harder than finding it."
+}

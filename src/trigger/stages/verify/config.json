@@ -1,5 +1,0 @@
-{
-  "model": "google:gemini-3.5-flash",
-  "temperature": 0.2,
-  "note": "Diagnosis only. Deliberately a different model from the one that wrote the prose, so it doesn't share the writer's blind spots. Low temperature: criticism should be repeatable."
-}

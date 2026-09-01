@@ -1,0 +1,11 @@
+# Synchronous HTTP Cannot Survive LLM Token Generation
+
+## The `maxDuration` Trap
+
+You wire up your first LLM endpoint, write a prompt, and hit send. Everything works perfectly on your local machine. Then you deploy it to a serverless environment, hand the model a slightly larger context window, and get slapped with a 504 Gateway Timeout. The instinct here is entirely predictable because backend engineers have all done this with slow database queries or heavy background tasks. You assume the request just needs a little more time to finish, so you go looking for the timeout configuration.
+
+Framework vendors actively encourage this bad habit in their documentation. If you look at the Vercel AI SDK quickstart, they explicitly instruct developers to drop `export const maxDuration = 60;` into the top of their route files. It feels like the sanctioned, correct way to handle AI routes. You change the default 10 or 15 seconds to 60, redeploy the application, and the 504 errors disappear. The endpoint works again. You close the ticket.
+
+This is a temporary band-aid that treats an unpredictable AI model like a slightly sluggish Postgres query. A database query usually has a predictable execution time bound by index efficiency and row counts. An LLM's token generation is completely unpredictable. It depends heavily on the provider's current load. Prompt complexity and the sheer volume of tokens the model decides to generate also swing the response time wildly. Eventually, 60 seconds will not be enough. When it fails again, you will find Reddit threads advising you to upgrade your account to a Vercel Pro plan specifically so you can change the maximum function duration to 5 minutes.
+
+Buying a five-minute timeout is paying to ignore the actual architectural problem. You are setting an arbitrary ceiling on a process that has no fixed upper bound. The generation time will inevitably breach that new artificial ceiling. It might happen because you gave the model a larger document to process. It might happen because the underlying LLM API degrades under heavy load. Whenever it does, the synchronous HTTP request will die. The user will stare at a spinner that eventually turns into an error state, and your application will break in production.

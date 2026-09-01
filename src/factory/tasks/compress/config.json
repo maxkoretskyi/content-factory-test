@@ -1,0 +1,10 @@
+{
+  "in": [
+    "draft.md"
+  ],
+  "out": "draft.md",
+  "mode": "single",
+  "model": "google:gemini-3.1-pro-preview",
+  "temperature": 0.2,
+  "note": "Deletion is judgement, so it keeps the strong model, but at low temperature \u2014 cutting should be conservative and repeatable, not creative."
+}

@@ -10,6 +10,7 @@ export default defineConfig({
   build: {
     // Stage prompts and configs are data files, not imports — the bundler would
     // otherwise leave them behind and every stage would fail on a deployed run.
-    extensions: [additionalFiles({ files: ["./src/trigger/stages/**/*.md", "./src/trigger/stages/**/*.json"] })],
+    // They live in src/factory, which `dirs` does not scan: it holds no tasks.
+    extensions: [additionalFiles({ files: ["./src/factory/**/*.md", "./src/factory/**/*.json"] })],
   },
 });
