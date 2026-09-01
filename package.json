@@ -1,0 +1,26 @@
+{
+  "name": "content-factory",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "license": "ISC",
+  "scripts": {
+    "dev:trigger": "trigger dev",
+    "deploy:trigger": "trigger deploy",
+    "chat": "tsx scripts/chat.ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@ai-sdk/google": "^4.0.59",
+    "@ai-sdk/otel": "^1.0.87",
+    "@trigger.dev/sdk": "4.5.15",
+    "ai": "^7.0.87"
+  },
+  "devDependencies": {
+    "@trigger.dev/build": "4.5.15",
+    "@types/node": "^26.4.0",
+    "trigger.dev": "4.5.15",
+    "tsx": "^4.23.13",
+    "typescript": "^7.0.2"
+  }
+}
