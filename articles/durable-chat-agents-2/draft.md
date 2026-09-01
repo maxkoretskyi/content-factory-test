@@ -1,0 +1,41 @@
+# The 29-Second Illusion
+
+AWS API Gateway enforces a hard 29-second integration timeout. If your backend fails to return a response before that timer hits zero, the connection is ruthlessly severed.
+
+This is the reality of standard HTTP request/response architectures, and it is why modeling an AI agent as a synchronous REST route is an architectural failure. The problem isn’t that the LLM is slow. The problem is that an agent is not a stateless network transaction.
+
+A multi-step GPT-4 agent execution routinely takes 40 seconds or more. I haven't tested the exact breaking point of every cloud load balancer out there, but even if you bypass API Gateway and configure a 5-minute timeout on your ingress, you are still forcing a brittle TCP connection to hold a stateful, non-deterministic reasoning loop.
+
+# The Non-Deterministic Tool Loop
+
+Backend engineers are used to treating slow network calls as slow queries. You fire a request, the database grinds, and the answer comes back. An agent is not a slow query. It is a stateful progression.
+
+Look at an OpenAI API trace for an agent equipped with tools. It doesn't sit there thinking for 40 seconds. It executes `search_db` and waits for the result. It evaluates the context, decides it needs more info, and triggers `fetch_url`. This requires continuous state accumulation across multiple network boundaries.
+
+If you model this inside a traditional Express or Next.js API route, that entire multi-turn tool calling loop is bound to the lifecycle of the incoming HTTP request. The compute process is tightly coupled to the socket. If the socket dies, the process dies.
+
+# The Cost of Stateless Workarounds
+
+When the socket drops, the client retries. That is standard REST behavior. Applying standard REST retries to a multi-turn agent breaks the architecture.
+
+Assume the client drops the TCP connection 35 seconds in, right after the agent has successfully fetched data and is summarizing the final answer. The client retries the `POST /chat` request. Because the API route is stateless, the backend has no memory of the previous run. It starts from scratch.
+
+You lose the intermediate tool-call state. You run the exact same expensive prompts again. You pay duplicate OpenAI API billing. You turn a 40-second operation into an 80-second disaster.
+
+# Shifting to Durable Execution
+
+To fix this, you have to stop treating an agent like an API endpoint. You need to treat it like a durable background process.
+
+Durable execution frameworks persist the state of the function at every step. Instead of holding an HTTP connection open while waiting for a tool call or human input, the compute process suspends.
+
+Using a primitive like Trigger.dev's `wait.forToken<ApprovalToken>(tokenId)`, the agent's compute state is suspended entirely while it waits for an external callback. It frees up the CPU and memory. It doesn't hold an active HTTP socket. When the token resolves, the agent resumes execution exactly where it left off, with all its local variables intact.
+
+# Decoupling the Network from the Compute
+
+Once the agent is a durable process, the client-server relationship flips. You decouple the network from the compute entirely.
+
+Your `POST /chat` endpoint no longer runs the agent. It kicks off the durable run using `tasks.trigger<typeof chatAgent>("chat-agent", payload)`. The endpoint immediately returns a `202 Accepted` along with the `run_id`.
+
+The client consumes the state changes asynchronously. It connects to a Server-Sent Events (SSE) stream tied to that specific ID, like `GET /realtime/v1/sessions/:chatId/out`. As the durable run generates tokens and calls tools, the client receives those updates as they happen.
+
+If the user closes their laptop or refreshes the page, the agent keeps running. When the client reconnects, it resumes reading from the stream. The compute process never notices the network hiccup.
