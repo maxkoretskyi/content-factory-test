@@ -28,6 +28,16 @@ async function say(text: string) {
   const stream = await agent.sendMessage(text);
   for await (const chunk of stream) {
     if (chunk.type === "text-delta") process.stdout.write(chunk.delta);
+    // Surface tool activity so it's visible in the terminal, not just the trace.
+    if (chunk.type === "tool-input-available") {
+      process.stdout.write(`
+  [tool] ${chunk.toolName}(${JSON.stringify(chunk.input)})
+`);
+    }
+    if (chunk.type === "tool-output-available") {
+      process.stdout.write(`  [tool] -> ${JSON.stringify(chunk.output).slice(0, 300)}
+`);
+    }
   }
   process.stdout.write("\n");
 }
