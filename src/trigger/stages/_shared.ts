@@ -1,58 +1,49 @@
-import { generateText, stepCountIs, type LanguageModel, type ToolSet } from "ai";
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
+import { createProviderRegistry, generateText } from "ai";
 import { createGoogleGenerativeAI } from "@ai-sdk/google";
 
-const google = createGoogleGenerativeAI({ apiKey: process.env.GEMINI_API_KEY });
-
-export type StageName =
-  | "thesis"
-  | "outline"
-  | "draft"
-  | "review-structure"
-  | "review-facts"
-  | "review-line"
-  | "revise";
+const registry = createProviderRegistry({
+  google: createGoogleGenerativeAI({ apiKey: process.env.GEMINI_API_KEY }),
+});
 
 /**
- * One place to tune which model does which job.
+ * A stage is a directory: prompt.md is what it's told, config.json is how it runs.
+ * Both are data, so the whole editorial policy is readable without opening any
+ * TypeScript and a model swap is a one-line JSON edit.
  *
- * Generative stages (thesis, outline, draft, revise) get the strongest model and
- * room to be interesting. Review stages get a *different* model on purpose: a
- * critic that shares the drafter's weights shares its blind spots and tends to
- * ratify its habits. With a single provider that only buys generation-diversity,
- * not family-diversity — a second provider's key would be a real improvement.
- *
- * Review temperatures are low: criticism should be boring and repeatable.
+ * These files are copied into the build by additionalFiles in trigger.config.ts —
+ * without it they exist in dev and vanish on deploy.
  */
-export const MODELS: Record<StageName, { model: LanguageModel; temperature?: number }> = {
-  thesis: { model: google("gemini-3.1-pro-preview"), temperature: 0.7 },
-  outline: { model: google("gemini-3.1-pro-preview"), temperature: 0.6 },
-  draft: { model: google("gemini-3.1-pro-preview"), temperature: 0.8 },
-  "review-structure": { model: google("gemini-3.5-flash"), temperature: 0.2 },
-  "review-facts": { model: google("gemini-3.5-flash"), temperature: 0.1 },
-  "review-line": { model: google("gemini-3.5-flash"), temperature: 0.2 },
-  revise: { model: google("gemini-3.1-pro-preview"), temperature: 0.7 },
+const STAGES = join(process.cwd(), "src", "trigger", "stages");
+
+export type StageConfig = {
+  model: string;
+  temperature?: number;
+  note?: string;
 };
 
-/** Each stage is its own model call with its own prompt and a fresh context. */
-export async function runStage(stage: StageName, system: string, prompt: string) {
-  const { text } = await generateText({ ...MODELS[stage], system, prompt });
-  return text.trim();
+/**
+ * Read every time, deliberately. Caching meant a running worker kept serving a
+ * prompt you had already edited — and since .md files aren't imported by anything,
+ * the dev watcher won't necessarily restart the worker for you. Two file reads are
+ * nothing next to the model call that follows.
+ */
+export function loadStage(stage: string) {
+  return {
+    system: readFileSync(join(STAGES, stage, "prompt.md"), "utf8"),
+    config: JSON.parse(readFileSync(join(STAGES, stage, "config.json"), "utf8")) as StageConfig,
+  };
 }
 
-/** Same, but the stage may use tools (retrieval) inside its own loop. */
-export async function runStageWithTools(
-  stage: StageName,
-  system: string,
-  prompt: string,
-  tools: ToolSet,
-  maxSteps = 12,
-) {
+/** One stage: text in, text out, in its own context with its own prompt and model. */
+export async function runStage(stage: string, input: string) {
+  const { system, config } = loadStage(stage);
   const { text } = await generateText({
-    ...MODELS[stage],
+    model: registry.languageModel(config.model as `google:${string}`),
+    temperature: config.temperature,
     system,
-    prompt,
-    tools,
-    stopWhen: stepCountIs(maxSteps),
+    prompt: input,
   });
   return text.trim();
 }

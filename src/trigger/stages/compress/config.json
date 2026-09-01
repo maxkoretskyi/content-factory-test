@@ -1,0 +1,5 @@
+{
+  "model": "google:gemini-3.1-pro-preview",
+  "temperature": 0.2,
+  "note": "Deletion is judgement, so it keeps the strong model, but at low temperature — cutting should be conservative and repeatable, not creative."
+}
