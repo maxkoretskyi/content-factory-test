@@ -39,6 +39,13 @@ export const PromptConfigSchema = z.object({
 export const TaskConfigSchema = PromptConfigSchema.extend({
   /** Artifacts it reads, joined in order and given to the prompt. */
   in: z.array(z.string().regex(/\.(md|json)$/, "expected a .md or .json artifact")).min(1),
+  /**
+   * Artifacts read if they exist and skipped if they do not. For material that
+   * improves a task without being required — so a task can be added to the
+   * pipeline, or taken out of it, without every downstream config changing.
+   */
+  optionalIn: z.array(z.string().regex(/\.(md|json)$/, "expected a .md or .json artifact")).optional(),
+
   /** The artifact it writes. Writing draft.md snapshots a revision. */
   out: z.string().regex(/\.(md|json)$/, "expected a .md or .json artifact"),
 

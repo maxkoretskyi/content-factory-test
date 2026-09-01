@@ -1,0 +1,10 @@
+{
+  "in": ["brief.json", "research.md"],
+  "out": "evidence.md",
+  "mode": "single",
+  "model": "google:gemini-3.1-pro-preview",
+  "temperature": 0.2,
+  "maxSteps": 25,
+  "tools": ["google_search", "url_context"],
+  "note": "The second task with web access, and the only one that opens pages. Low temperature: this is checking, not composing. High step budget because verifying each specific is a separate lookup."
+}

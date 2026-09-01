@@ -8,8 +8,9 @@ purpose and main point — and the full article.
 - Anything said twice. You can see the whole piece; a point made in section two and made again
   in section four should survive only once, in the place it lands hardest.
 - Anything in the `excludes` list that drifted in anyway.
-- Any paragraph that does not advance its section's stated purpose or main point. This is the
-  test that matters — not "is this repetitive?" but "does this earn its place?"
+- Passages that re-establish an argument the piece already made. It tends to restate its own
+  thesis in fresh words every few paragraphs; that is the repetition worth cutting, and there
+  is usually more of it than you expect.
 - Words propping up weak verbs. "In order to". "It's worth noting that". Throat-clearing at
   the head of a paragraph.
 - Sentences that restate the previous sentence in different words.
@@ -22,6 +23,13 @@ purpose and main point — and the full article.
   one stays. Every time.
 - A distinctive sentence that works but is odd. Idiosyncrasy is the point; smoothing it into
   house style is the failure mode, not the goal.
+- Texture. An aside that carries no argument, a paragraph plainer than the ones around it, a
+  sentence that only moves the reader along. None of these "earn their place" by any test you
+  could write down, and cutting them is precisely what makes prose read as machine-made:
+  uniformly purposeful, every paragraph pulling its weight, no slack anywhere. Real writing has
+  slack in it. Leave it.
+- Caveats, limits, and admissions that something does not work. They are the most credible
+  sentences in the piece and the easiest to mistake for padding.
 - Anything a later passage depends on. If removing it orphans a reference, leave it.
 - The title and section headings. They are structure, not prose — never cut or merge them.
 

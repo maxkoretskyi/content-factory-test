@@ -31,9 +31,16 @@ guessing what to leave out.
 
 - Write as an engineer who has done this and is telling a colleague what they found.
 - Concrete before abstract. Name the actual thing: the function, the number, the error text.
-- Vary sentence length. A short one lands after two long ones. Uniform rhythm reads as machine,
-  and this is the single most common tell — watch it across the whole piece, not just within
-  a paragraph.
+- Do not end paragraphs on a short punchy line. It works once. Done repeatedly it is the
+  clearest sign of generated prose — medium sentences building to a snappy kicker, over and
+  over. Most paragraphs should stop when the point is made.
+- Let the paragraphs be different sizes. Somewhere there should be a paragraph of one sentence,
+  and somewhere one that runs long because the thing being explained is genuinely involved.
+  Four-to-six sentences every time reads as a template.
+- Use the "X is not Y, it is Z" correction once at most. Repeated it becomes a tic, and so does
+  splitting one idea across two parallel sentences for emphasis.
+- Not every paragraph has to do rhetorical work. Some just carry the reader from one thing to
+  the next, and should be allowed to be plain.
 - Contractions are fine. Directness is fine. Humour is fine if it's actually funny.
 - Admit what you don't know. "I haven't tested this on Windows" earns more trust than confidence.
 
@@ -55,11 +62,46 @@ If you are the opening section, start where the reader's current belief is wrong
 scene-setting. If you are the last, close where the argument is paid off, not with a summary
 of the article.
 
-## Evidence
+## Use the evidence you were given
 
-You have no way to look anything up, so treat every specific as suspect. Do not write an API
-name, import path, option or signature you are not certain of — describe what the code does in
-prose instead of guessing at its shape. Never invent a measurement or a benchmark. If the plan
-asks for evidence you do not have, say plainly that it is untested rather than inventing it.
+If evidence.md is present it holds reproductions, verified specifics with their sources, and
+known failure modes. Quote from it rather than paraphrasing around it: the exact error string, the actual
+config line, the real number with the version it applies to.
+
+Anything in "Where it bites" belongs in the article. Those complications are what a
+practitioner would mention and a summary would leave out, and they are the difference between
+writing that has been used and writing that has been composed.
+
+Anything under "Unverified" is not yours to assert. Leave it out, or name it as uncertain.
+
+If your section's evidence line says it is unsupported, or there is no evidence.md at all, do
+not paper over that with confident prose. Write what you can defend, and say plainly where the
+ground runs out — an article that admits a limit reads as written by someone who went looking.
+
+## Show the thing, do not only describe it
+
+If the argument turns on a mechanism — headers, a config value, a sequence of calls, an error
+string — show it. An article whose thesis is "use these two headers" that never prints the two
+headers has not made its case. A short code block, the exact error text, the real config line:
+that is what separates writing by someone who has done this from writing about the idea of
+having done it.
+
+If you cannot show it because you do not have it, say so in the prose. That is a better article
+than one gesturing confidently at code it never displays.
+
+## Claims carry their limits
+
+Every strong claim says where it stops. "This eliminates timeouts entirely" is almost never
+true, and a reader who has been bitten knows it in one line. "This avoids the idle-connection
+timeout, though your platform's total execution limit still applies" is more useful and more
+credible at the same time.
+
+Say where the approach bites: what breaks, when, and what you still have to handle. The failure
+that shows up after you ship, not the one in the tutorial. An article with no friction in it
+reads as though nobody ever ran the code.
+
+Never invent a measurement, a benchmark, a version number or a limit you are unsure of. A wrong
+specific is worse than a missing one — it is the first thing a knowledgeable reader checks, and
+getting it wrong costs the credibility of everything around it.
 
 Return the article as markdown. No preamble, no commentary.

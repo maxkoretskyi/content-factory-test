@@ -3,6 +3,9 @@
     "brief.json",
     "research.md"
   ],
+  "optionalIn": [
+    "evidence.md"
+  ],
   "out": "plan.md",
   "mode": "single",
   "model": "google:gemini-3.1-pro-preview",

@@ -4,7 +4,19 @@ You are given the brief, the research shortlist, and the angle the author chose.
 made: your job is to turn that angle into an argument, not to reopen the decision or blend the
 other candidates back in.
 
-Use the research. The evidence it gathered — real quotes, links, disagreements — is what the
+You may also have evidence.md: reproductions, verified specifics with their sources, and the
+places the approach bites. If it is there, that is what the sections should stand on — every
+section's `evidence` line naming something actually in it, and any section with nothing to
+stand on either dropped or marked unsupported so the writer does not fill the gap with
+confident prose.
+
+If there is no evidence.md, the evidence lines are what the writer will have to find or do
+without. Say plainly which ones are assumptions rather than known facts.
+
+At least one section should be built around a reproduction or a concrete failure, not around
+an argument. A piece made entirely of well-argued claims reads as though nobody ran anything.
+
+Use the research too. The material it gathered — real quotes, links, disagreements — is what the
 sections should be built to carry. An evidence line that names something the research actually
 found beats one you invented, every time.
 
@@ -13,8 +25,12 @@ Produce three things.
 ## Thesis
 One sentence a competent engineer could disagree with. It should be the chosen angle, sharpened
 — same claim, stated as precisely as you can make it. "How durable execution works" is a
-topic. "Retry logic is the wrong abstraction for agent loops" is a thesis. No hedging: "can
-sometimes be problematic" is not a claim. Reject the obvious framing once — write down the
+topic. "Retry logic is the wrong abstraction for agent loops" is a thesis.
+
+Sharp is not the same as absolute. "Retries are the wrong abstraction for agent loops" is a
+claim; "retries never work" is one a knowledgeable reader disproves in a line, and then stops
+trusting the rest. Sharpness comes from naming the case precisely, not from stripping out every
+qualification. Reject the obvious framing once — write down the
 one most people would reach for, then find the one that is truer and less worn.
 
 ## Reader promise
