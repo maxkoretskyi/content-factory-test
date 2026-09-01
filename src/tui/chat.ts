@@ -27,6 +27,26 @@ const agent = new AgentChat<typeof myChat>({ agent: "my-chat", id: chatId });
 const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
 
 /**
+ * readline delivers one line per Enter, so a pasted block arrives as several
+ * lines and everything after the first would be answered by the next prompt.
+ * A paste arrives as a burst, so collect anything that lands right behind the
+ * first line and treat it as part of the same input.
+ */
+async function ask(prompt: string): Promise<string> {
+  const first = await rl.question(prompt);
+  const rest: string[] = [];
+  await new Promise<void>((resolve) => {
+    const onLine = (line: string) => rest.push(line);
+    rl.on("line", onLine);
+    setTimeout(() => {
+      rl.off("line", onLine);
+      resolve();
+    }, 80);
+  });
+  return [first, ...rest].join(String.fromCharCode(10)).trim();
+}
+
+/**
  * A pipeline turn is minutes of silence punctuated by tool calls, so the terminal
  * has to say what it is waiting on. Falls back to plain lines when stdout isn't a
  * TTY, since the animation would just be escape codes in a log.
@@ -138,30 +158,29 @@ async function consume(stream: AsyncIterable<any>): Promise<Ask | undefined> {
 }
 
 /** Render the options, take a pick, and resume the suspended run with the answer. */
-async function answer(ask: Ask) {
-  console.log(`\n${ask.question}\n`);
-  ask.options.forEach((o, i) => {
+async function answer(question: Ask) {
+  console.log(String.fromCharCode(10) + question.question + String.fromCharCode(10));
+  question.options.forEach((o, i) => {
     console.log(`  ${i + 1}. ${o.label}`);
     if (o.detail) console.log(`     ${o.detail.replace(/\n/g, "\n     ")}\n`);
   });
 
-  let chosen: (typeof ask.options)[number] | undefined;
-  while (!chosen) {
-    const reply = (await rl.question(`pick 1-${ask.options.length} > `)).trim();
-    chosen = ask.options[Number(reply) - 1];
-    if (!chosen) console.log("  not one of the options");
-  }
+  // Anything that isn't one of the numbers is sent as the answer verbatim. The
+  // options are the agent's suggestions, not the only things you may say.
+  const reply = await ask(`pick 1-${question.options.length}, or just say what you want > `);
+  const picked = question.options[Number(reply) - 1];
+  const chosen = picked ?? { id: "other", label: reply };
 
   // The slim continuation shape: the agent overlays this tool-state advance onto
   // the assistant message it is holding, so only the resolved part is needed.
   return agent.sendRaw([
     {
-      id: ask.messageId,
+      id: question.messageId,
       role: "assistant",
       parts: [
         {
           type: "tool-ask-user",
-          toolCallId: ask.toolCallId,
+          toolCallId: question.toolCallId,
           state: "output-available",
           output: { id: chosen.id, label: chosen.label },
         },
@@ -192,7 +211,7 @@ if (once !== undefined) {
   console.log("(/exit to close, Ctrl-C to leave the conversation running)\n");
   try {
     while (true) {
-      const line = (await rl.question("you > ")).trim();
+      const line = await ask("you > ");
       if (!line) continue;
       if (line === "/exit") break;
       await say(line);

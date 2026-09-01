@@ -1,3 +1,4 @@
+<!-- The fourth paragraph — "Buying a five-minute timeout..." — is repeating what the paragraph before it already said. Cut it down to two sentences. -->
 # Synchronous HTTP Cannot Survive LLM Token Generation
 
 ## The `maxDuration` Trap
