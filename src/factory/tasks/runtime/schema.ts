@@ -7,13 +7,26 @@ const TASKS_DIR = join(process.cwd(), "src", "factory", "tasks");
 /** Shared by anything that has a prompt.md and calls a model. */
 export const PromptConfigSchema = z.object({
   /** Provider-prefixed, resolved through the registry, e.g. "google:gemini-3.5-flash". */
-  model: z.string().regex(/^google:[a-z0-9.\-]+$/, "expected 'google:<model-id>'"),
+  model: z
+    .string()
+    .regex(/^(google|openai):[a-z0-9.\-]+$/, "expected 'google:<model-id>' or 'openai:<model-id>'"),
   temperature: z.number().min(0).max(2).optional(),
 
   /** Provider-executed tools. Google requires these exact names. */
   tools: z.array(z.enum(["google_search", "url_context"])).optional(),
   /** Task budget when the task has tools. Ignored otherwise. */
   maxTasks: z.number().int().min(1).max(50).optional(),
+
+  /**
+   * Passed straight through to the model call, keyed by provider. For settings
+   * that only one vendor has: reasoning effort, thinking budgets, safety
+   * thresholds. Kept as data so switching a task between providers stays a
+   * config edit.
+   *
+   *   "providerOptions": { "openai": { "reasoningEffort": "none" } }
+   *   "providerOptions": { "google": { "thinkingConfig": { "thinkingBudget": 0 } } }
+   */
+  providerOptions: z.record(z.string(), z.record(z.string(), z.unknown())).optional(),
 
   /** Where a searching task should look. Rendered into its prompt. */
   sources: z.array(z.object({ search: z.string(), for: z.string() })).optional(),

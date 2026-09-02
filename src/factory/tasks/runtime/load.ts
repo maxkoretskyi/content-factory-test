@@ -2,6 +2,7 @@ import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { createProviderRegistry, generateText, stepCountIs, type ToolSet } from "ai";
 import { createGoogleGenerativeAI, google } from "@ai-sdk/google";
+import { createOpenAI } from "@ai-sdk/openai";
 import {
   PromptConfigSchema,
   TaskConfigSchema,
@@ -11,9 +12,17 @@ import {
   type TaskName,
 } from "./schema.js";
 
+/**
+ * Providers a task's `model` can name. The prefix picks one, so switching a task
+ * between vendors is a one-line config edit and nothing else changes — the task's
+ * prompt, its io contract and the workflow around it are all provider-agnostic.
+ */
 const registry = createProviderRegistry({
   google: createGoogleGenerativeAI({ apiKey: process.env.GEMINI_API_KEY }),
+  openai: createOpenAI({ apiKey: process.env.OPENAI_API_KEY }),
 });
+
+type ModelId = `google:${string}` | `openai:${string}`;
 
 /**
  * A task is a directory: prompt.md is what it's told, config.json is everything
@@ -83,8 +92,7 @@ function loadFrom(folder: string, label: string, schema: typeof PromptConfigSche
   return { system, config };
 }
 
-export const resolveModel = (config: PromptConfig) =>
-  registry.languageModel(config.model as `google:${string}`);
+export const resolveModel = (config: PromptConfig) => registry.languageModel(config.model as ModelId);
 
 /** One task: text in, text out, in its own context with its own prompt and model. */
 export async function runTask(task: TaskName, input: string) {
@@ -93,6 +101,11 @@ export async function runTask(task: TaskName, input: string) {
   const { text } = await generateText({
     model: resolveModel(config),
     temperature: config.temperature,
+    // Zod gives us Record<string, Record<string, unknown>>; the SDK wants
+    // Record<string, JSONObject>. Same shape, validated at load.
+    ...(config.providerOptions
+      ? { providerOptions: config.providerOptions as Record<string, Record<string, never>> }
+      : {}),
     system,
     prompt: input,
     ...(tools ? { tools, stopWhen: stepCountIs(config.maxTasks ?? 12) } : {}),
